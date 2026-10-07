@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata: 
+  name: frontend
+  namespace: fe-namespace
+
+spec: 
+  relicas: 2
+
+  selector: 
+    matchLabels: 
+      app: frontend
+
+  template: 
+    metadata: 
+      labels: 
+        app: frontend
+
+    spec:
+      serviceAccountName: frontend-sa
+
+      containers: 
+        - name: frontend
+          image: 987865590233.dkr.ecr.ap-southeast-1.amazonaws.com/code-repo:frontend
+          ports:
+            - containerPort: 3000
+
+          resource:
+            request:
+              memory: "256Mi"
+              cpu: "256m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

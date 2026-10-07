@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata: 
+  name: backend
+  namespace: be-namespace
+
+spec: 
+  relicas: 2
+
+  selector: 
+    matchLabels: 
+      app: backend
+
+  template: 
+    metadata: 
+      labels: 
+        app: backend
+
+    spec:
+      serviceAccountName: backend-sa
+
+      containers: 
+        - name: backend
+          image: 987865590233.dkr.ecr.ap-southeast-1.amazonaws.com/code-repo:backend
+          ports:
+            - containerPort: 5000
+
+          resource:
+            request:
+              memory: "256Mi"
+              cpu: "256m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          
+          volumeMounts:
+            - name: shared-logs
+              mountPath: "/usr/src/app/logs"
+              readOnly: true
+
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: backend-secrets-class
+    
+    
+          
+    
+  
