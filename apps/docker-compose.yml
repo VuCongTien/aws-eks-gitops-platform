@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - POD_NAME=local-backend-pod-1
+      - NODE_NAME=docker-desktop
+      - NODE_AZ=ap-southeast-1a
+      - AWS_REGION=ap-southeast-1
+      # Disable DB and AWS features locally by leaving secrets empty or uncommenting below
+      # - DB_HOST=your-local-db (if you want to test with a local PostgreSQL)
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - BACKEND_URL=http://backend:5000
+      - POD_NAME=local-frontend-pod-1
+      - NODE_AZ=ap-southeast-1a
+    depends_on:
+      - backend

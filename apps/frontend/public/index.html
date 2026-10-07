@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS EKS Production-like GitOps Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-icon">🚀</div>
+        <div>
+          <h1>AWS EKS GitOps Platform</h1>
+          <p class="subtitle">Production Architecture Verification Dashboard</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="polling-badge" id="pollingBadge">
+          <span class="pulse-dot"></span>
+          <span id="pollingStatusText">Auto-Polling (2s)</span>
+        </div>
+        <button id="togglePollingBtn" class="btn btn-outline">Pause</button>
+        <button id="manualRefreshBtn" class="btn btn-primary">Refresh Now</button>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="dashboard-grid">
+
+      <!-- Card 1: Active Pod Topology & Multi-AZ -->
+      <section class="card glass-card hero-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">📍</span>
+            <h2>Active Pod & Multi-AZ Location</h2>
+          </div>
+          <span class="tag tag-live">LIVE RESPONSE</span>
+        </div>
+
+        <div class="topology-hero">
+          <div class="az-badge-container">
+            <span class="az-label">Availability Zone</span>
+            <div id="activeAzBadge" class="az-badge az-unknown">Loading...</div>
+          </div>
+
+          <div class="pod-metrics">
+            <div class="metric-box">
+              <span class="metric-label">Backend Pod Name</span>
+              <span id="activePodName" class="metric-value font-mono">--</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Node Name</span>
+              <span id="activeNodeName" class="metric-value font-mono">--</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Namespace</span>
+              <span id="activeNamespace" class="metric-value font-mono">--</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Latency</span>
+              <span id="activeLatency" class="metric-value font-mono">-- ms</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 2: Load Balancing & Multi-AZ Pod Tracker -->
+      <section class="card glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">📊</span>
+            <h2>Traffic Load Distribution</h2>
+          </div>
+          <button id="resetStatsBtn" class="btn btn-sm btn-ghost">Reset Stats</button>
+        </div>
+
+        <div class="distribution-container">
+          <div class="stats-summary">
+            <div>Total Requests: <strong id="totalRequestsCount">0</strong></div>
+            <div>Unique Pods Hit: <strong id="uniquePodsCount">0</strong></div>
+          </div>
+
+          <h3>Pods Hit Distribution:</h3>
+          <div id="podDistributionList" class="pod-distribution-list">
+            <div class="empty-state">No request data collected yet.</div>
+          </div>
+
+          <h3>Availability Zone Distribution:</h3>
+          <div id="azDistributionList" class="az-distribution-list">
+            <div class="empty-state">No AZ data collected yet.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 3: Horizontal Pod Autoscaler (HPA) Stress Test -->
+      <section class="card glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">⚡</span>
+            <h2>Autoscaling & Stress Test</h2>
+          </div>
+          <span class="tag tag-warn">TEST HPA</span>
+        </div>
+
+        <p class="card-description">
+          Generate CPU intensive work on Backend Pods to trigger Kubernetes Horizontal Pod Autoscaler (HPA).
+        </p>
+
+        <div class="stress-controls">
+          <div class="form-group">
+            <label for="stressDuration">Stress Duration (seconds):</label>
+            <select id="stressDuration" class="select-input">
+              <option value="5">5 Seconds (Light Load)</option>
+              <option value="15" selected>15 Seconds (Medium Load)</option>
+              <option value="30">30 Seconds (Heavy HPA Stress)</option>
+            </select>
+          </div>
+          <button id="startStressBtn" class="btn btn-danger btn-block">
+            <span>🔥 Run CPU Load Test</span>
+          </button>
+        </div>
+
+        <div id="stressStatusContainer" class="stress-status hidden">
+          <div class="progress-bar-container">
+            <div id="stressProgressBar" class="progress-bar" style="width: 0%;"></div>
+          </div>
+          <div id="stressStatusText" class="stress-text font-mono">Initializing stress test...</div>
+        </div>
+      </section>
+
+      <!-- Card 4: RDS PostgreSQL Database Integration -->
+      <section class="card glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">🗄️</span>
+            <h2>RDS PostgreSQL Database</h2>
+          </div>
+          <span id="dbStatusBadge" class="tag tag-unknown">Checking...</span>
+        </div>
+
+        <div class="db-info-box">
+          <div class="db-metric">
+            <span class="label">Database Host:</span>
+            <span id="dbHostText" class="value font-mono">--</span>
+          </div>
+          <div class="db-metric">
+            <span class="label">Database User:</span>
+            <span id="dbUserText" class="value font-mono">--</span>
+          </div>
+          <div class="db-metric">
+            <span class="label">Total Logged Visits:</span>
+            <span id="dbTotalVisits" class="value highlight">0</span>
+          </div>
+        </div>
+
+        <div class="db-actions">
+          <button id="logVisitBtn" class="btn btn-secondary btn-block">
+            <span>📝 Record Visit to Database</span>
+          </button>
+        </div>
+
+        <div class="recent-visits-box">
+          <h4>Recent Database Logs:</h4>
+          <ul id="recentVisitsList" class="visits-list">
+            <li class="empty-state">No database records fetched.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Card 5: AWS IRSA, Secrets Manager & AppConfig -->
+      <section class="card glass-card span-2">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">🔒</span>
+            <h2>AWS Security & AppConfig (IRSA Integration)</h2>
+          </div>
+        </div>
+
+        <div class="security-grid">
+          <div class="sec-box">
+            <div class="sec-title">🔑 Authentication</div>
+            <div class="sec-value">IAM Roles for Service Accounts (IRSA)</div>
+            <p class="sec-desc">No AWS Access Key/Secret Key stored in pods or Git repository.</p>
+          </div>
+
+          <div class="sec-box">
+            <div class="sec-title">🔐 Secrets Manager</div>
+            <div id="secSecretsSource" class="sec-value font-mono">Fetching...</div>
+            <p class="sec-desc">Database credentials retrieved dynamically at runtime.</p>
+          </div>
+
+          <div class="sec-box">
+            <div class="sec-title">⚙️ AWS AppConfig</div>
+            <div id="secAppConfigStatus" class="sec-value">Fetching...</div>
+            <div id="secAppConfigData" class="sec-code font-mono">{}</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>AWS EKS Production-like GitOps Platform | Terraform + ArgoCD + ECR + RDS + IRSA + WAF</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
