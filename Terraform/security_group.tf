@@ -14,17 +14,17 @@ resource "aws_security_group" "eks_sg" {
   vpc_id      = aws_vpc.main.id
 
   tags = {
-    Name = "eks-security-group"
+    Name = "eks-sg"
   }
 }
 
-resource "aws_security_group" "rds_sg" {
-  name        = "rds-sg"
+resource "aws_security_group" "db_sg" {
+  name        = "db-sg"
   description = "Security Group for PostgreSQL RDS"
   vpc_id      = aws_vpc.main.id
 
   tags = {
-    Name = "rds-security-group"
+    Name = "db-sg"
   }
 }
 
@@ -33,7 +33,7 @@ resource "aws_security_group_rule" "allow_eks_to_rds" {
   from_port         = 5432
   to_port           = 5432
   protocol          = "tcp"
-  security_group_id = aws_security_group.rds_sg.id
+  security_group_id = aws_security_group.db_sg.id
 
   source_security_group_id = aws_security_group.eks_sg.id
 

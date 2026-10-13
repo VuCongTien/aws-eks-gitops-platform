@@ -1,0 +1,35 @@
+replicaCount: 2
+
+image:
+  repository: 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/tienvc-app/backend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5000
+  targetPort: 5000
+
+serviceAccount:
+  create: true
+  name: backend-sa
+  roleArn: "arn:aws:iam::793239960568:role/EKSBackendAppRole"
+
+secretsManager:
+  enabled: true
+  secretName: "lab/db/credentials"
+  region: "ap-southeast-1"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 50

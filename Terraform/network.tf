@@ -1,15 +1,13 @@
-#clear
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = {
-    Name = "my-custom-vpc"
+    Name = "my-vpc-lab-eks"
   }
 }
 
-#clear
 resource "aws_subnet" "public_subnet_1a" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.public_subnet_cidr_1a
@@ -21,7 +19,6 @@ resource "aws_subnet" "public_subnet_1a" {
   }
 }
 
-#clear
 resource "aws_subnet" "public_subnet_1b" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.public_subnet_cidr_1b
@@ -33,7 +30,6 @@ resource "aws_subnet" "public_subnet_1b" {
   }
 }
 
-#clear
 resource "aws_subnet" "private_subnet_eks_1a" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.private_subnet_cidr_eks_1a
@@ -44,7 +40,6 @@ resource "aws_subnet" "private_subnet_eks_1a" {
   }
 }
 
-#clear
 resource "aws_subnet" "private_subnet_eks_1b" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.private_subnet_cidr_eks_1b
@@ -55,7 +50,6 @@ resource "aws_subnet" "private_subnet_eks_1b" {
   }
 }
 
-#clear
 resource "aws_subnet" "private_subnet_db_1a" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.private_subnet_cidr_db_1a
@@ -66,7 +60,6 @@ resource "aws_subnet" "private_subnet_db_1a" {
   }
 }
 
-#clear
 resource "aws_subnet" "private_subnet_db_1b" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.private_subnet_cidr_db_1b
@@ -78,16 +71,16 @@ resource "aws_subnet" "private_subnet_db_1b" {
 }
 
 
-#clear
+
 resource "aws_internet_gateway" "main_igw" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "main-igw"
+    Name = "my-vpc-lab-eks-igw"
   }
 }
 
-#clear
+
 resource "aws_route_table" "public-rtb-lab-eks" {
   vpc_id = aws_vpc.main.id
 
@@ -101,42 +94,33 @@ resource "aws_route_table" "public-rtb-lab-eks" {
   }
 }
 
-#clear
 resource "aws_route_table_association" "public_1" {
   subnet_id      = aws_subnet.public_subnet_1a.id
   route_table_id = aws_route_table.public-rtb-lab-eks.id
 }
 
-#clear
 resource "aws_route_table_association" "public_2" {
   subnet_id      = aws_subnet.public_subnet_1b.id
   route_table_id = aws_route_table.public-rtb-lab-eks.id
 }
 
 
-#clear
 resource "aws_eip" "nat" {
-  domain     = "vpc"
-  depends_on = [aws_internet_gateway.main_igw]
-
+  domain = "vpc"
   tags = {
     Name = "nat-eip"
   }
 }
 
-#clear
 resource "aws_nat_gateway" "main" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public_subnet_1a.id
 
   tags = {
-    Name = "main-nat-gateway"
+    Name = "nat-gateway-lab-eks"
   }
-
-  depends_on = [aws_internet_gateway.main_igw]
 }
 
-#clear
 resource "aws_route_table" "private_eks_rt" {
   vpc_id = aws_vpc.main.id
 
@@ -150,19 +134,16 @@ resource "aws_route_table" "private_eks_rt" {
   }
 }
 
-#clear
 resource "aws_route_table_association" "private_assoc_eks_1a" {
   subnet_id      = aws_subnet.private_subnet_eks_1a.id
   route_table_id = aws_route_table.private_eks_rt.id
 }
 
-#clear
 resource "aws_route_table_association" "private_assoc_eks_1b" {
   subnet_id      = aws_subnet.private_subnet_eks_1b.id
   route_table_id = aws_route_table.private_eks_rt.id
 }
 
-#clear
 resource "aws_route_table" "private_db_rt" {
   vpc_id = aws_vpc.main.id
 
@@ -176,13 +157,11 @@ resource "aws_route_table" "private_db_rt" {
   }
 }
 
-#clear
 resource "aws_route_table_association" "private_assoc_db_1a" {
   subnet_id      = aws_subnet.private_subnet_db_1a.id
   route_table_id = aws_route_table.private_db_rt.id
 }
 
-#clear
 resource "aws_route_table_association" "private_assoc_db_1b" {
   subnet_id      = aws_subnet.private_subnet_db_1b.id
   route_table_id = aws_route_table.private_db_rt.id

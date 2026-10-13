@@ -1,22 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
-
-metadata: 
-  name: backend-network-policy
-  namespace: be-namespace
-
+metadata:
+  name: {{ .Release.Name }}-backend-network-policy
 spec:
-  podSelector: 
-    matchLabels: 
+  podSelector:
+    matchLabels:
       app: backend
-  
-  policyTypes: 
+  policyTypes:
     - Ingress
-    - Egress
-
-  ingress: 
-    - from: 
-        - namespaceSelector: {} 
-      ports: 
-        - port: 5000
-        
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - port: {{ .Values.service.targetPort }}

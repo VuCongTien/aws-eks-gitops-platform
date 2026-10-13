@@ -9,23 +9,52 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   }
 }
 
+ephemeral "random_password" "db_password" {
+  length           = 24
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "aws_secretsmanager_secret" "db_secret" {
+  name = "my-postgres-credentials"
+}
+
+resource "aws_secretsmanager_secret_version" "db_secret" {
+  secret_id = aws_secretsmanager_secret.db_secret.id
+
+  secret_string_wo = jsonencode({
+    username = "dbadmin"
+    password = ephemeral.random_password.db_password.result
+  })
+
+  secret_string_wo_version = 1
+}
+
+ephemeral "aws_secretsmanager_secret_version" "db_secret" {
+  secret_id = aws_secretsmanager_secret_version.db_secret.secret_id
+}
+
 resource "aws_db_instance" "postgres_db" {
   identifier        = "my-db"
   engine            = "postgres"
-  engine_version    = "15.4"
   instance_class    = "db.t3.micro"
   allocated_storage = 20
 
-  username = "postgres"
-  password = var.db_password
+  multi_az = false
+
+  username = "dbadmin"
+
+  password_wo = jsondecode(
+    ephemeral.aws_secretsmanager_secret_version.db_secret.secret_string
+  )["password"]
+
+  password_wo_version = aws_secretsmanager_secret_version.db_secret.secret_string_wo_version
 
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.name
-  vpc_security_group_ids = [aws_security_group.rds_sg.id]
-  publicly_accessible    = false
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
+
+  publicly_accessible = false
+  storage_encrypted   = true
 
   skip_final_snapshot = true
-
-  tags = {
-    Name = "My Postgres Database"
-  }
 }

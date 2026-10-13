@@ -58,8 +58,4 @@ variable "availability_zone_1b" {
   description = "Availability Zone để đặt subnet"
 }
 
-variable "db_password" {
-  type        = string
-  default     = "Admin123456"
-  description = "Password for PostgreSQL RDS"
-}
+
