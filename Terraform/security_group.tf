@@ -28,6 +28,7 @@ resource "aws_security_group" "db_sg" {
   }
 }
 
+
 resource "aws_security_group_rule" "allow_eks_to_rds" {
   type              = "ingress"
   from_port         = 5432
@@ -58,4 +59,37 @@ resource "aws_security_group_rule" "public_egress_all" {
   security_group_id = aws_security_group.public_sg.id
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Allow all outbound traffic"
+}
+
+resource "aws_security_group_rule" "alb_http" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  security_group_id = aws_security_group.public_sg.id
+  cidr_blocks       = ["0.0.0.0/0"]
+
+  description = "Allow HTTP from Internet"
+}
+
+resource "aws_security_group_rule" "alb_https" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.public_sg.id
+  cidr_blocks       = ["0.0.0.0/0"]
+
+  description = "Allow HTTPS from Internet"
+}
+
+resource "aws_security_group_rule" "allow_alb_to_eks" {
+  type                     = "ingress"
+  from_port                = 3000
+  to_port                  = 3000
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.eks_sg.id
+  source_security_group_id = aws_security_group.public_sg.id
+
+  description = "Allow traffic from ALB to EKS"
 }

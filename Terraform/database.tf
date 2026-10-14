@@ -16,7 +16,7 @@ ephemeral "random_password" "db_password" {
 }
 
 resource "aws_secretsmanager_secret" "db_secret" {
-  name = "my-postgres-credentials"
+  name = "my-postgres-credentials-v2"
 }
 
 resource "aws_secretsmanager_secret_version" "db_secret" {

@@ -1,16 +1,18 @@
+namespace: frontend-ns
+
 replicaCount: 2
 
 image:
-  repository: 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/tienvc-app/frontend
+  repository: 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/frontend
   tag: latest
   pullPolicy: IfNotPresent
 
 service:
-  type: NodePort
+  type: ClusterIP
   port: 80
   targetPort: 3000
 
-backendUrl: "http://backend-app-backend:5000"
+backendUrl: "http://backend-app-backend.backend-ns.svc.cluster.local:5000"
 
 ingress:
   enabled: true

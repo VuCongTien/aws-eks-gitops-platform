@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: {{ .Release.Name }}-backend-network-policy
+  namespace: {{ .Values.namespace }}
 spec:
   podSelector:
     matchLabels:
@@ -10,6 +11,8 @@ spec:
     - Ingress
   ingress:
     - from:
-        - namespaceSelector: {}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.frontendNamespace }}
       ports:
         - port: {{ .Values.service.targetPort }}
