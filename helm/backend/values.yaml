@@ -18,9 +18,15 @@ serviceAccount:
   name: backend-sa
   roleArn: "arn:aws:iam::793239960568:role/EKSBackendAppRole"
 
+database:
+  host: "my-db.cz4acc2wwek5.ap-southeast-1.rds.amazonaws.com"
+  port: 5432
+  name: "postgres"
+  ssl: false
+
 secretsManager:
   enabled: true
-  secretName: "my-postgres-credentials-v2"
+  secretName: "my-postgres-credentials-positive-anteater"
   region: "ap-southeast-1"
 
 resources:

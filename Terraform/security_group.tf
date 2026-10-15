@@ -36,7 +36,7 @@ resource "aws_security_group_rule" "allow_eks_to_rds" {
   protocol          = "tcp"
   security_group_id = aws_security_group.db_sg.id
 
-  source_security_group_id = aws_security_group.eks_sg.id
+  source_security_group_id = data.aws_eks_cluster.current.vpc_config[0].cluster_security_group_id
 
   description = "Allow PostgreSQL from EKS nodes"
 }
@@ -92,4 +92,31 @@ resource "aws_security_group_rule" "allow_alb_to_eks" {
   source_security_group_id = aws_security_group.public_sg.id
 
   description = "Allow traffic from ALB to EKS"
+}
+
+resource "aws_security_group" "vpc_endpoint_sg" {
+  name        = "vpc-endpoint-sg"
+  description = "Allow EKS nodes to access interface VPC endpoints over HTTPS"
+  vpc_id      = aws_vpc.main.id
+
+  tags = {
+    Name = "vpc-endpoint-sg"
+  }
+}
+
+data "aws_eks_cluster" "current" {
+  name = "my-cluster"
+}
+
+resource "aws_security_group_rule" "vpc_endpoint_https_from_eks" {
+  type      = "ingress"
+  from_port = 443
+  to_port   = 443
+  protocol  = "tcp"
+
+  security_group_id = aws_security_group.vpc_endpoint_sg.id
+
+  source_security_group_id = data.aws_eks_cluster.current.vpc_config[0].cluster_security_group_id
+
+  description = "Allow HTTPS from EKS worker nodes to VPC endpoints"
 }

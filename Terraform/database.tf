@@ -15,8 +15,12 @@ ephemeral "random_password" "db_password" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
+resource "random_pet" "secret_suffix" {
+  length = 2
+}
+
 resource "aws_secretsmanager_secret" "db_secret" {
-  name = "my-postgres-credentials-v2"
+  name = "my-postgres-credentials-${random_pet.secret_suffix.id}"
 }
 
 resource "aws_secretsmanager_secret_version" "db_secret" {

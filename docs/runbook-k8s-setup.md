@@ -20,7 +20,7 @@ terraform output
 
 ```bash
 # Cập nhật kubeconfig trỏ vào cluster mới
-aws eks update-kubeconfig --region ap-southeast-1 --name lab-eks-cluster
+aws eks update-kubeconfig --region ap-southeast-1 --name my-cluster
 
 # Xác minh IAM identity đang dùng (phải trùng với identity đã tạo cluster)
 aws sts get-caller-identity
@@ -37,7 +37,7 @@ kubectl get nodes
 
 ```bash
 VPC_ID=$(aws eks describe-cluster \
-  --name lab-eks-cluster \
+  --name my-cluster \
   --region ap-southeast-1 \
   --query "cluster.resourcesVpcConfig.vpcId" \
   --output text)
@@ -116,12 +116,12 @@ aws ecr get-login-password --region ap-southeast-1 | \
   docker login --username AWS --password-stdin 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com
 
 # 6.2 Build & Push Backend
-cd /mnt/d/Fsoft/Cloud/CloudAWS/Long-lab-aws-eks/apps/backend
+cd /mnt/d/Fsoft/Cloud/CloudAWS/Long-lab-aws-eks/Long-lab-aws-eks-app/apps/backend
 docker build -t 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/backend:latest .
 docker push 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/backend:latest
 
 # 6.3 Build & Push Frontend
-cd /mnt/d/Fsoft/Cloud/CloudAWS/Long-lab-aws-eks/apps/frontend
+cd /mnt/d/Fsoft/Cloud/CloudAWS/Long-lab-aws-eks/Long-lab-aws-eks-app/apps/frontend
 docker build -t 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/frontend:latest .
 docker push 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/frontend:latest
 ```
@@ -131,7 +131,7 @@ docker push 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/frontend:latest
 ## BƯỚC 7: Deploy Backend & Frontend qua Helm
 
 ```bash
-cd /mnt/d/Fsoft/Cloud/CloudAWS/Long-lab-aws-eks/helm
+cd /mnt/d/Fsoft/Cloud/CloudAWS/Long-lab-aws-eks/Long-lab-aws-eks-infra/helm
 kubectl create namespace backend-ns
 kubectl create namespace frontend-ns
 

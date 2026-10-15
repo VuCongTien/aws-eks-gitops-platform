@@ -51,3 +51,4 @@ resource "aws_iam_role_policy_attachment" "node_policy_3" {
   role       = aws_iam_role.eks_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
 }
+
