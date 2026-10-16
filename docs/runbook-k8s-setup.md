@@ -626,3 +626,11 @@ kubectl get pods -n frontend-ns -o wide
 ```
 
 Workflow chỉ push image sau khi PR app được merge và chỉ tạo GitOps PR sau khi push cả hai image thành công. Rollback bằng cách revert GitOps PR/commit để trả chart về image tag trước; ArgoCD sẽ triển khai lại tag đó.
+
+### Kết quả CI/CD end-to-end đã xác nhận (2026-10-16)
+
+- App workflow commit `125cdc4` đã chạy thành công cả ba job: build hai image, push hai image lên ECR qua GitHub OIDC, và tạo GitOps image-update PR.
+- GitOps PR `#1` đổi tag của cả backend và frontend sang `sha-125cdc4a7808158248f340fb67e27f5d41d9448c-2`; checks passed, không conflict, và PR đã được merge.
+- Người dùng bấm Sync thủ công trong ArgoCD sau khi merge. Sau đó `backend-app` và `frontend-app` đều `Synced`/`Healthy`; Deployment backend và frontend cùng chạy image tag `sha-125cdc4a7808158248f340fb67e27f5d41d9448c-2`.
+- Đã xác nhận cả hai Application có `.spec.syncPolicy.automated` với `prune: false` và `selfHeal: true`. Vì lần rollout này được kích hoạt bằng manual Sync, lần phát hành kế tiếp cần quan sát ArgoCD tự sync trước khi thao tác thủ công để xác minh hành vi auto-sync thực tế.
+- Fine-grained PAT cần giới hạn vào repo `aws-eks-gitops-platform-infra` và có repository permissions `Contents: Read and write`, `Pull requests: Read and write`; lưu dưới secret `GITOPS_TOKEN` trong app repo. Không ghi giá trị token vào runbook.
