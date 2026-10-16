@@ -5,7 +5,7 @@ replicaCount: 2
 
 image:
   repository: 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/backend
-  tag: crud-20261016
+  tag: sha-125cdc4a7808158248f340fb67e27f5d41d9448c-2
   pullPolicy: IfNotPresent
 
 service:
