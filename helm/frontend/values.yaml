@@ -4,7 +4,7 @@ replicaCount: 2
 
 image:
   repository: 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/frontend
-  tag: latest
+  tag: crud-proxy-fix-20261016
   pullPolicy: IfNotPresent
 
 service:

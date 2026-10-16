@@ -105,7 +105,8 @@ resource "aws_security_group" "vpc_endpoint_sg" {
 }
 
 data "aws_eks_cluster" "current" {
-  name = "my-cluster"
+  name       = aws_eks_cluster.main.name
+  depends_on = [aws_eks_cluster.main]
 }
 
 resource "aws_security_group_rule" "vpc_endpoint_https_from_eks" {

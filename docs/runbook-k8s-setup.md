@@ -150,7 +150,7 @@ kubectl get pods -w
 
 ```bash
 # Chờ khoảng 1-2 phút cho ALB Controller tạo Load Balancer
-kubectl get ingress
+kubectl get ingress -n frontend-ns
 
 # Khi cột ADDRESS xuất hiện URL, chạy lệnh này để lấy nhanh:
 kubectl get ingress frontend-app-frontend-ingress \

@@ -5,7 +5,7 @@ replicaCount: 2
 
 image:
   repository: 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/backend
-  tag: latest
+  tag: crud-20261016
   pullPolicy: IfNotPresent
 
 service:
@@ -22,11 +22,11 @@ database:
   host: "my-db.cz4acc2wwek5.ap-southeast-1.rds.amazonaws.com"
   port: 5432
   name: "postgres"
-  ssl: false
+  ssl: true
 
 secretsManager:
   enabled: true
-  secretName: "my-postgres-credentials-positive-anteater"
+  secretName: "my-postgres-credentials-keen-grouse"
   region: "ap-southeast-1"
 
 resources:
