@@ -4,7 +4,7 @@ replicaCount: 2
 
 image:
   repository: 793239960568.dkr.ecr.ap-southeast-1.amazonaws.com/frontend
-  tag: sha-125cdc4a7808158248f340fb67e27f5d41d9448c-2
+  tag: sha-f5da53dc73ecba664ab4033d9d79b92a0a39a315-1
   pullPolicy: IfNotPresent
 
 service:
