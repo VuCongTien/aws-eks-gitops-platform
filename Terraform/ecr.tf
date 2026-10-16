@@ -1,6 +1,6 @@
 resource "aws_ecr_repository" "backend" {
   name                 = "backend"
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = "IMMUTABLE"
 
   encryption_configuration {
     encryption_type = "AES256"
@@ -19,12 +19,12 @@ resource "aws_ecr_lifecycle_policy" "backend" {
     rules = [
       {
         rulePriority = 1
-        description  = "Keep the latest 10 tagged images"
+        description  = "Keep the latest 10 version-tagged images"
         selection = {
-          tagStatus     = "tagged"
-          tagPrefixList = ["v"]
-          countType     = "imageCountMoreThan"
-          countNumber   = 10
+          tagStatus      = "tagged"
+          tagPrefixList  = ["v"]
+          countType      = "imageCountMoreThan"
+          countNumber    = 10
         }
         action = {
           type = "expire"
@@ -32,6 +32,19 @@ resource "aws_ecr_lifecycle_policy" "backend" {
       },
       {
         rulePriority = 2
+        description  = "Keep the latest 10 CI commit-tagged images"
+        selection = {
+          tagStatus      = "tagged"
+          tagPatternList = ["sha-*"]
+          countType      = "imageCountMoreThan"
+          countNumber    = 10
+        }
+        action = {
+          type = "expire"
+        }
+      },
+      {
+        rulePriority = 3
         description  = "Remove untagged images after 7 days"
         selection = {
           tagStatus   = "untagged"
@@ -49,7 +62,7 @@ resource "aws_ecr_lifecycle_policy" "backend" {
 
 resource "aws_ecr_repository" "frontend" {
   name                 = "frontend"
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = "IMMUTABLE"
 
   encryption_configuration {
     encryption_type = "AES256"
@@ -68,12 +81,12 @@ resource "aws_ecr_lifecycle_policy" "frontend" {
     rules = [
       {
         rulePriority = 1
-        description  = "Keep the latest 10 tagged images"
+        description  = "Keep the latest 10 version-tagged images"
         selection = {
-          tagStatus     = "tagged"
-          tagPrefixList = ["v"]
-          countType     = "imageCountMoreThan"
-          countNumber   = 10
+          tagStatus      = "tagged"
+          tagPrefixList  = ["v"]
+          countType      = "imageCountMoreThan"
+          countNumber    = 10
         }
         action = {
           type = "expire"
@@ -81,6 +94,19 @@ resource "aws_ecr_lifecycle_policy" "frontend" {
       },
       {
         rulePriority = 2
+        description  = "Keep the latest 10 CI commit-tagged images"
+        selection = {
+          tagStatus      = "tagged"
+          tagPatternList = ["sha-*"]
+          countType      = "imageCountMoreThan"
+          countNumber    = 10
+        }
+        action = {
+          type = "expire"
+        }
+      },
+      {
+        rulePriority = 3
         description  = "Remove untagged images after 7 days"
         selection = {
           tagStatus   = "untagged"

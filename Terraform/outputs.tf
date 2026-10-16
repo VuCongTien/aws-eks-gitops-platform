@@ -137,3 +137,8 @@ output "ecr_repositories" {
     }
   }
 }
+
+output "github_actions_ecr_role_arn" {
+  description = "IAM role assumed by the app repository GitHub Actions workflow through OIDC"
+  value       = aws_iam_role.github_actions_ecr_push.arn
+}
