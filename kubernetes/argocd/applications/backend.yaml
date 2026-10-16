@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/VuCongTien/aws-eks-gitops-platform
+    repoURL: https://github.com/VuCongTien/aws-eks-gitops-platform-infra.git
     targetRevision: main
     path: helm/backend
     helm:

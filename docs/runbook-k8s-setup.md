@@ -329,13 +329,13 @@ Người dùng xác nhận đăng nhập UI ArgoCD thành công qua port-forward
 
 ## PHASE 3 — STEP 1: Kết nối GitOps repository vào ArgoCD
 
-Project hiện có hai GitHub repository riêng: app source `https://github.com/VuCongTien/my-app-v1.git` và infra/GitOps `https://github.com/VuCongTien/aws-eks-gitops-platform.git`. ArgoCD cần đọc repository infra vì hai Helm chart hiện nằm tại `helm/backend` và `helm/frontend` trong repository đó. Điều này chưa tạo Application hay thay đổi release đang chạy.
+Project hiện có hai GitHub repository riêng: app source `https://github.com/VuCongTien/my-app-v1.git` và infra/GitOps `https://github.com/VuCongTien/aws-eks-gitops-platform-infra.git`. ArgoCD cần đọc repository infra vì hai Helm chart hiện nằm tại `helm/backend` và `helm/frontend` trong repository đó. Điều này chưa tạo Application hay thay đổi release đang chạy.
 
 Trong ArgoCD UI:
 
 1. Mở **Settings → Repositories → Connect Repo**.
 2. Chọn kết nối **Via HTTPS**.
-3. Điền repository URL `https://github.com/VuCongTien/aws-eks-gitops-platform.git`.
+3. Điền repository URL `https://github.com/VuCongTien/aws-eks-gitops-platform-infra.git`.
 4. Nếu repository public, để trống username/password rồi chọn **Connect**. Nếu GitHub báo cần xác thực, dừng lại; không gửi token hoặc password qua chat.
 
 ### Cách xác minh
@@ -345,7 +345,7 @@ Trong ArgoCD UI:
 - Chưa tạo ArgoCD Application và chưa bật auto-sync ở bước này.
 ### Kết quả kết nối GitOps repository đã xác minh
 
-Người dùng xác nhận ArgoCD hiển thị repository `https://github.com/VuCongTien/aws-eks-gitops-platform` với Connection Status `Successful`.
+Người dùng xác nhận ArgoCD hiển thị repository `https://github.com/VuCongTien/aws-eks-gitops-platform` với Connection Status `Successful`. GitHub sau đó thông báo repository đã chuyển sang `https://github.com/VuCongTien/aws-eks-gitops-platform-infra.git`; cập nhật URL canonical trong Argo CD repo connection và Application manifests.
 
 ---
 
@@ -573,7 +573,7 @@ Người dùng đã kiểm tra DIFF: Service, Deployment, HPA và Ingress chỉ 
 
 ## PHASE 4 — CI/CD: GitHub Actions → ECR → GitOps PR → ArgoCD
 
-Hai repo app và GitOps được tối ưu cho luồng tách biệt: app repo `VuCongTien/my-app-v1`; GitOps repo `VuCongTien/aws-eks-gitops-platform`. Workflow tại `Long-lab-aws-eks-app/.github/workflows/app-ci-cd.yml` build hai Docker image khi có PR, và khi merge/push lên `main` thì dùng GitHub OIDC để push tag `sha-<commit-sha>-<run-attempt>` vào ECR. Sau đó workflow tạo/cập nhật PR trong GitOps repo để đổi tag cho cả hai Helm chart. Merge PR là release approval; ArgoCD auto-sync triển khai tag mới. ECR repository dùng immutable tags; lifecycle policy giữ 10 image version-tagged, giữ 10 image CI-tagged gần nhất, đồng thời xóa image không tag sau 7 ngày.
+Hai repo app và GitOps được tối ưu cho luồng tách biệt: app repo `VuCongTien/my-app-v1`; GitOps repo `VuCongTien/aws-eks-gitops-platform-infra`. Workflow tại `Long-lab-aws-eks-app/.github/workflows/app-ci-cd.yml` build hai Docker image khi có PR, và khi merge/push lên `main` thì dùng GitHub OIDC để push tag `sha-<commit-sha>-<run-attempt>` vào ECR. Sau đó workflow tạo/cập nhật PR trong GitOps repo để đổi tag cho cả hai Helm chart. Merge PR là release approval; ArgoCD auto-sync triển khai tag mới. ECR repository dùng immutable tags; lifecycle policy giữ 10 image version-tagged, giữ 10 image CI-tagged gần nhất, đồng thời xóa image không tag sau 7 ngày.
 
 IAM role `github-actions-ecr-push` chỉ được assume từ app repo trên branch `main`; policy chỉ cho phép push vào hai ECR repo của project. GitHub OIDC provider dùng audience `sts.amazonaws.com`; subject được khóa theo repository ID `1418957504`, owner ID `217227847`, và branch `main`. Tham khảo [GitHub OIDC cho AWS](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws) và [IAM permissions cho ECR push](https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-push-iam.html).
 
@@ -600,7 +600,7 @@ terraform output -raw github_actions_ecr_role_arn
 Trong Settings → Secrets and variables → Actions của `VuCongTien/my-app-v1`:
 
 - Repository variable `AWS_ECR_ROLE_ARN`: giá trị từ output `github_actions_ecr_role_arn`.
-- Repository secret `GITOPS_TOKEN`: fine-grained token chỉ có quyền vào `aws-eks-gitops-platform`, với `Contents: Read and write` và `Pull requests: Read and write`. Không đưa token vào file hay workflow log.
+- Repository secret `GITOPS_TOKEN`: fine-grained token chỉ có quyền vào `aws-eks-gitops-platform-infra`, với `Contents: Read and write` và `Pull requests: Read and write`. Không đưa token vào file hay workflow log.
 
 ### Bước 3: Bật ArgoCD auto-sync
 
